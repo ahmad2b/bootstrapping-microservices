@@ -14,7 +14,7 @@ if (!process.env.PORT) {
 const port = process.env.PORT;
 
 app.get('/video', async (req: Request, res: Response) => {
-	const videoPath = './video.mp4';
+	const videoPath = './videos/video.mp4';
 	const stats = await fs.promises.stat(videoPath);
 
 	res.writeHead(200, {
