@@ -51,6 +51,8 @@ async function main() {
 		const videoId = new mongodb.ObjectId(req.query.id as string);
 		const videoRecord = await videoCollection.findOne({ _id: videoId });
 
+		console.log(`Streaming video ${videoRecord?.videoPath}`);
+
 		if (!videoRecord) {
 			res.sendStatus(404);
 			return;
@@ -75,7 +77,9 @@ async function main() {
 	});
 
 	app.listen(PORT, () => {
-		console.log(`Video Streaming service is online`);
+		console.log(
+			`Microservice listening, please load the data file db-fixture/videos.json into your database before testing this microservice.`
+		);
 	});
 }
 
