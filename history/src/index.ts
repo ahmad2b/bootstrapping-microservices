@@ -17,7 +17,7 @@ async function main() {
 	});
 
 	app.get('/history', (req, res) => {
-		res.json({ message: 'Hello history service!' });
+		res.json({ message: 'Hello World!' });
 	});
 }
 
