@@ -1,4 +1,5 @@
 import express from 'express';
+import mongodb from 'mongodb';
 
 if (!process.env.PORT) {
 	throw new Error(
@@ -6,18 +7,34 @@ if (!process.env.PORT) {
 	);
 }
 
+if (!process.env.DBHOST) {
+	throw new Error(
+		'Please specify the database host using environment variable DBHOST.'
+	);
+}
+
+if (!process.env.DBNAME) {
+	throw new Error(
+		'Please specify the name of the database using environment variable DBNAME'
+	);
+}
+
 const PORT = process.env.PORT;
+const DBHOST = process.env.DBHOST;
+const DBNAME = process.env.DBNAME;
 
 async function main() {
-	console.log('Starting history service...');
 	const app = express();
+	app.use(express.json());
 
-	app.listen(PORT, () => {
-		console.log(`History service is online!`, { port: PORT });
-	});
+	const client = await mongodb.MongoClient.connect(DBHOST);
+	const db = client.db(DBNAME);
+	const historyCollection = db.collection('history');
 
-	app.get('/history', (req, res) => {
-		res.json({ message: 'Hello World!' });
+	app.post('/viewed', async (req, res) => {
+		const videoPath = req.body.videoPath;
+		await historyCollection.insertOne({ videoPath });
+		res.sendStatus(200);
 	});
 }
 
