@@ -46,9 +46,14 @@ async function main() {
 
 	const messageChannel = await messagingConnection.createChannel();
 
-	await messageChannel.assertQueue('viewed', {});
+	// await messageChannel.assertQueue('viewed', {});
+	await messageChannel.assertExchange('viewed', 'fanout'); // Asserts that the "viewed" exchange exists.
 
-	console.log('Created "viewed" queue');
+	const { queue } = await messageChannel.assertQueue('', { exclusive: true });
+
+	console.log(`Created queue ${queue}, binding it to "viewed" exchange.`);
+
+	await messageChannel.bindQueue(queue, 'viewed', '');
 
 	await messageChannel.consume('viewed', async (msg) => {
 		console.log('Received "viewed" message');

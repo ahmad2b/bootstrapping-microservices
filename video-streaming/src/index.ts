@@ -84,10 +84,24 @@ async function main() {
 	console.log('Connected to RabbitMQ.');
 
 	const messageChannel = await messagingConnection.createChannel(); // Creates a RabbitMQ messaging channel.
+	await messageChannel.assertExchange('viewed', 'fanout'); // Asserts that the "viewed" exchange exists.
 
 	// const client = await MongoClient.connect(DBHOST);
 	// const db = client.db(DBNAME);
 	// const videoCollection = db.collection('videos');
+
+	function broadcastViewedMessage(
+		messageChannel: amqp.Channel,
+		videoPath: string
+	) {
+		return (videoPath: string) => {
+			console.log('Broadcasting message on "viewed" exchange');
+
+			const msg = { videoPath };
+			const jsonMsg = JSON.stringify(msg);
+			messageChannel.publish('viewed', '', Buffer.from(jsonMsg));
+		};
+	}
 
 	const app = express();
 
@@ -129,7 +143,7 @@ async function main() {
 
 		fs.createReadStream(videoPath).pipe(res);
 
-		sendViewedMessage(videoPath, messageChannel);
+		broadcastViewedMessage(messageChannel, videoPath);
 	});
 
 	app.listen(PORT, () => {
